@@ -11,6 +11,7 @@ const Login = React.lazy(() => import("./features/auth/pages/Login"));
 const UploadPage = React.lazy(() => import("./features/upload/pages/UploadPage"));
 const Settings = React.lazy(() => import("./features/settings/pages/Settings"));
 const ReportsPage = React.lazy(() => import("./features/reports/pages/ReportsPage"));
+const ReportDetails = React.lazy(() => import("./features/reports/pages/ReportDetails"));
 
 // Loading Component
 const Loading = () => (
@@ -49,6 +50,10 @@ export default function App() {
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/reports" element={<ReportsPage />} />
+            <Route
+              path="/reports/:batchId/:processNo"
+              element={<ReportDetails />}
+            />
           </Route>
         </Route>
 
