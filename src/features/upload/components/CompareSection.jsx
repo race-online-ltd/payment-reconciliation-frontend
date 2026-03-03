@@ -12,7 +12,7 @@ export default function CompareSection({ disabled, onCompare }) {
         mb: 4,
         px: { xs: 2, sm: 0 }, // responsive horizontal padding on mobile
       }}
-    >
+    > 
       <Button
         variant="contained"
         disabled={disabled}
