@@ -20,11 +20,13 @@ import { fetchComparisonDetails } from "../api/reportsApi";
 import axios from "axios";
 
 const columns = [
+  { id: "date", label: "Vendor trx Date", sortable: true },
+  { id: "date", label: "Billing trx Date", sortable: true },
   { id: "trxId", label: "Transaction ID", sortable: true },
-  { id: "senderWallet", label: "Sender Wallet", sortable: true },
-  { id: "userId", label: "User ID", sortable: true },
+  { id: "senderWallet", label: "Sender Number", sortable: true },
+  { id: "userId", label: "Customer ID", sortable: true },
   { id: "entity", label: "Entity", sortable: true },
-  { id: "date", label: "Date", sortable: true },
+  // { id: "date", label: "Date", sortable: true },
   { id: "amount", label: "Amount", sortable: true },
   { id: "channel", label: "Channel", sortable: true },
   { id: "wallet", label: "Wallet", sortable: true },
