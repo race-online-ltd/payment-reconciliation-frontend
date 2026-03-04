@@ -4,11 +4,13 @@ import { Box } from "@mui/material";
 import ReprocessModal from "../../../components/reports/ReprocessModal";
 import { fetchReconciliationSummary } from "../api/reportsApi";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 function transformSummary(apiData) {
   return apiData.map((item) => ({
     id: `${item.batch_id}_${item.process_no}`,
-    date: item.date,
+    start_date: item.start_date,   // from batches table
+    end_date: item.end_date,       // from batches table
     transactions: item.transactions,
     matched: item.matched,
     mismatched: {
@@ -27,36 +29,27 @@ function transformSummary(apiData) {
 export default function ReportsPage() {
   const navigate = useNavigate();
   const [reportData, setReportData] = useState([]);
-  const [reprocessModalOpen, setReprocessModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [dateRange, setDateRange] = useState({
+    start_date: '2024-01-01',  // sensible default
+    end_date: dayjs().format('YYYY-MM-DD'),
+  });
 
   useEffect(() => {
-    const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
-      .toISOString()
-      .split("T")[0];
-    const lastDay = today.toISOString().split("T")[0];
-
-    fetchReconciliationSummary(firstDay, lastDay)
-      .then((res) => {
-        setReportData(transformSummary(res.data.data));
-      })
-      .catch((err) => {
-        console.error("Failed to fetch summary", err);
-      });
-  }, []);
+    setLoading(true);
+    fetchReconciliationSummary(dateRange.start_date, dateRange.end_date)
+      .then((res) => setReportData(transformSummary(res.data.data)))
+      .catch((err) => console.error("Failed to fetch summary", err))
+      .finally(() => setLoading(false));
+  }, [dateRange]);  // re-fetches when filter changes
 
   return (
     <Box sx={{ maxWidth: "100%", mx: "auto", py: 4, px: { xs: 2, sm: 3 } }}>
       <ReportsSummaryTable
         data={reportData}
-        onView={(row) => {
-          navigate(`/reports/${row.batch_id}/${row.process_no}`);
-        }}
-      />
-
-      <ReprocessModal
-        open={reprocessModalOpen}
-        onClose={() => setReprocessModalOpen(false)}
+        loading={loading}
+        onDateRangeChange={setDateRange}  // ← table calls this on Apply
+        onView={(row) => navigate(`/reports/${row.batch_id}/${row.process_no}`)}
       />
     </Box>
   );
