@@ -40,11 +40,8 @@ export default function ReportsSummaryTable({ data, loading, onDateRangeChange, 
   // --- Build table rows directly from server-filtered data ---
   const rows = data.map((row) => ({
     id: row.id,
-    date: (
-      <Typography sx={{ fontWeight: 600 }}>
-        {dayjs(row.start_date).format("DD-MM-YYYY")} → {dayjs(row.end_date).format("DD-MM-YYYY")}
-      </Typography>
-    ),
+    // ✅ plain string for sorting
+  date: `${dayjs(row.start_date).format("DD-MM-YYYY")} → ${dayjs(row.end_date).format("DD-MM-YYYY")}`,
     transactions: (
       <Typography sx={{ fontWeight: 700, color: "#1e293b" }}>
         {row.transactions}
@@ -88,8 +85,8 @@ export default function ReportsSummaryTable({ data, loading, onDateRangeChange, 
 
   const columns = [
     { id: "date",         label: "Date",         sortable: true },
-    { id: "transactions", label: "Transactions",  sortable: true },
-    { id: "matched",      label: "Matched",       sortable: true },
+    { id: "transactions", label: "Transactions" },
+    { id: "matched",      label: "Matched"},
     {
       id:      "mismatched_group",
       label:   "Mismatched",
