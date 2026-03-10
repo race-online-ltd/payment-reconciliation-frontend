@@ -312,3 +312,523 @@ export default function BaseTable({
     </Box>
   );
 }
+
+
+
+// --- Resizable Columns Hook ---
+
+// import * as React from "react";
+// import PropTypes from "prop-types";
+// import {
+//   Box,
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TablePagination,
+//   TableRow,
+//   TableSortLabel,
+//   Paper,
+//   Checkbox,
+//   IconButton,
+//   Typography,
+//   Stack,
+//   Divider,
+// } from "@mui/material";
+// import { visuallyHidden } from "@mui/utils";
+// import DeleteIcon from "@mui/icons-material/Delete";
+// import EditIcon from "@mui/icons-material/Edit";
+// import ExportCSVButton from "./ExportCSVButton";
+// import FilterButton from "./FilterButton";
+
+// // --- Sorting Helpers ---
+// function descendingComparator(a, b, orderBy) {
+//   if (b[orderBy] < a[orderBy]) return -1;
+//   if (b[orderBy] > a[orderBy]) return 1;
+//   return 0;
+// }
+
+// function getComparator(order, orderBy) {
+//   return order === "desc"
+//     ? (a, b) => descendingComparator(a, b, orderBy)
+//     : (a, b) => -descendingComparator(a, b, orderBy);
+// }
+
+// // --- Resizable Columns Hook ---
+// function useResizableColumns(columns) {
+//   const [columnWidths, setColumnWidths] = React.useState(() =>
+//     Object.fromEntries(
+//       columns
+//         .flatMap((col) => col.children || [col])
+//         .map((col) => [col.id, col.defaultWidth || 150])
+//     )
+//   );
+
+//   const startResize = React.useCallback(
+//     (colId, startX) => {
+//       const startWidth = columnWidths[colId];
+
+//       const onMouseMove = (e) => {
+//         const newWidth = Math.max(60, startWidth + (e.clientX - startX));
+//         setColumnWidths((prev) => ({ ...prev, [colId]: newWidth }));
+//       };
+
+//       const onMouseUp = () => {
+//         document.removeEventListener("mousemove", onMouseMove);
+//         document.removeEventListener("mouseup", onMouseUp);
+//         document.body.style.cursor = "";
+//         document.body.style.userSelect = "";
+//       };
+
+//       document.body.style.cursor = "col-resize";
+//       document.body.style.userSelect = "none";
+//       document.addEventListener("mousemove", onMouseMove);
+//       document.addEventListener("mouseup", onMouseUp);
+//     },
+//     [columnWidths]
+//   );
+
+//   return { columnWidths, startResize };
+// }
+
+// // --- Resize Handle ---
+// function ResizeHandle({ colId, startResize }) {
+//   return (
+//     <Box
+//       onMouseDown={(e) => {
+//         e.stopPropagation();
+//         e.preventDefault();
+//         startResize(colId, e.clientX);
+//       }}
+//       sx={{
+//         position: "absolute",
+//         right: 0,
+//         top: 0,
+//         bottom: 0,
+//         width: "5px",
+//         cursor: "col-resize",
+//         zIndex: 2,
+//         borderRight: "2px solid transparent",
+//         "&:hover": {
+//           borderRight: "2px solid #3b82f6",
+//         },
+//         "&:active": {
+//           borderRight: "2px solid #2563eb",
+//         },
+//       }}
+//     />
+//   );
+// }
+
+// // --- Table Head ---
+// function BaseTableHead({
+//   columns,
+//   order,
+//   orderBy,
+//   numSelected,
+//   rowCount,
+//   onSelectAllClick,
+//   onRequestSort,
+//   hasAction,
+//   selectable,
+//   columnWidths,
+//   startResize,
+// }) {
+//   const createSortHandler = (property) => (event) =>
+//     onRequestSort(event, property);
+
+//   const secondaryHeaderColumns = columns.flatMap((col) => col.children || []);
+//   const hasSecondaryHeader = secondaryHeaderColumns.length > 0;
+
+//   return (
+//     <TableHead
+//       sx={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "#f8fafc" }}
+//     >
+//       <TableRow>
+//         {selectable && (
+//           <TableCell
+//             padding="checkbox"
+//             rowSpan={hasSecondaryHeader ? 2 : 1}
+//             sx={{
+//               backgroundColor: "#f8fafc",
+//               border: "1px solid #e2e8f0",
+//               textAlign: "center",
+//               width: 50,
+//               minWidth: 50,
+//             }}
+//           >
+//             <Checkbox
+//               color="primary"
+//               indeterminate={numSelected > 0 && numSelected < rowCount}
+//               checked={rowCount > 0 && numSelected === rowCount}
+//               onChange={onSelectAllClick}
+//             />
+//           </TableCell>
+//         )}
+
+//         {columns.map((column) => (
+//           <TableCell
+//             key={column.id}
+//             align="center"
+//             colSpan={column.colSpan || 1}
+//             rowSpan={column.children ? 1 : hasSecondaryHeader ? 2 : 1}
+//             sortDirection={orderBy === column.id ? order : false}
+//             sx={{
+//               backgroundColor: "#f8fafc",
+//               fontWeight: 700,
+//               color: "#475569",
+//               fontSize: "0.875rem",
+//               border: "1px solid #e2e8f0",
+//               width: columnWidths[column.id],
+//               minWidth: columnWidths[column.id],
+//               maxWidth: columnWidths[column.id],
+//               position: "relative",
+//               p: "6px 16px 6px 8px",
+//               overflow: "hidden",
+//               whiteSpace: "nowrap",
+//             }}
+//           >
+//             <Box
+//               sx={{
+//                 display: "flex",
+//                 alignItems: "center",
+//                 justifyContent: "center",
+//                 overflow: "hidden",
+//               }}
+//             >
+//               {column.sortable ? (
+//                 <TableSortLabel
+//                   active={orderBy === column.id}
+//                   direction={orderBy === column.id ? order : "asc"}
+//                   onClick={createSortHandler(column.id)}
+//                   sx={{
+//                     justifyContent: "center",
+//                     width: "100%",
+//                     "& .MuiTableSortLabel-icon": { ml: 0.5 },
+//                   }}
+//                 >
+//                   {column.label}
+//                   {orderBy === column.id && (
+//                     <Box component="span" sx={visuallyHidden}>
+//                       {order === "desc"
+//                         ? "sorted descending"
+//                         : "sorted ascending"}
+//                     </Box>
+//                   )}
+//                 </TableSortLabel>
+//               ) : (
+//                 column.label
+//               )}
+//             </Box>
+
+//             <ResizeHandle colId={column.id} startResize={startResize} />
+//           </TableCell>
+//         ))}
+
+//         {hasAction && (
+//           <TableCell
+//             align="center"
+//             rowSpan={hasSecondaryHeader ? 2 : 1}
+//             sx={{
+//               backgroundColor: "#f8fafc",
+//               fontWeight: 700,
+//               color: "#475569",
+//               border: "1px solid #e2e8f0",
+//               width: 80,
+//               minWidth: 80,
+//             }}
+//           >
+//             Actions
+//           </TableCell>
+//         )}
+//       </TableRow>
+
+//       {hasSecondaryHeader && (
+//         <TableRow>
+//           {secondaryHeaderColumns.map((child) => (
+//             <TableCell
+//               key={child.id}
+//               align="center"
+//               sx={{
+//                 backgroundColor: "#f8fafc",
+//                 fontWeight: 700,
+//                 color: "#475569",
+//                 fontSize: "0.75rem",
+//                 border: "1px solid #e2e8f0",
+//                 width: columnWidths[child.id],
+//                 minWidth: columnWidths[child.id],
+//                 maxWidth: columnWidths[child.id],
+//                 position: "relative",
+//                 p: "6px 16px 6px 8px",
+//                 overflow: "hidden",
+//                 whiteSpace: "nowrap",
+//               }}
+//             >
+//               {child.label}
+//               <ResizeHandle colId={child.id} startResize={startResize} />
+//             </TableCell>
+//           ))}
+//         </TableRow>
+//       )}
+//     </TableHead>
+//   );
+// }
+
+// // --- BaseTable Component ---
+// export default function BaseTable({
+//   columns,
+//   rows,
+//   title,
+//   selectable = true,
+//   hasAction = true,
+//   showExport = true,
+//   onEditRow,
+//   onDeleteRow,
+//   onFilter,
+//   onExport,
+//   filterContent = null,
+//   totalRows = null,
+//   page: externalPage = null,
+//   rowsPerPage: externalRowsPerPage = null,
+//   onPageChange = null,
+//   onRowsPerPageChange = null,
+// }) {
+//   const [order, setOrder] = React.useState("asc");
+//   const [orderBy, setOrderBy] = React.useState(columns[0]?.id || "");
+//   const [selected, setSelected] = React.useState([]);
+//   const [internalPage, setInternalPage] = React.useState(0);
+//   const [internalRowsPerPage, setInternalRowsPerPage] = React.useState(10);
+
+//   const isServerSide = totalRows !== null && externalPage !== null;
+//   const page = isServerSide ? externalPage : internalPage;
+//   const rowsPerPage = isServerSide ? externalRowsPerPage : internalRowsPerPage;
+//   const count = isServerSide ? totalRows : rows.length;
+//   const dense = true;
+
+//   const { columnWidths, startResize } = useResizableColumns(columns);
+
+//   const handleRequestSort = (event, property) => {
+//     const isAsc = orderBy === property && order === "asc";
+//     setOrder(isAsc ? "desc" : "asc");
+//     setOrderBy(property);
+//   };
+
+//   const handleSelectAllClick = (event) => {
+//     if (event.target.checked) {
+//       setSelected(rows.map((r) => r.id));
+//       return;
+//     }
+//     setSelected([]);
+//   };
+
+//   const handleClick = (event, id) => {
+//     if (!selectable) return;
+//     const selectedIndex = selected.indexOf(id);
+//     let newSelected = [];
+//     if (selectedIndex === -1)
+//       newSelected = newSelected.concat(selected, id);
+//     else if (selectedIndex === 0)
+//       newSelected = newSelected.concat(selected.slice(1));
+//     else if (selectedIndex === selected.length - 1)
+//       newSelected = newSelected.concat(selected.slice(0, -1));
+//     else if (selectedIndex > 0)
+//       newSelected = newSelected.concat(
+//         selected.slice(0, selectedIndex),
+//         selected.slice(selectedIndex + 1)
+//       );
+//     setSelected(newSelected);
+//   };
+
+//   const flatColumns = React.useMemo(() => {
+//     return columns.flatMap((col) => (col.children ? col.children : col));
+//   }, [columns]);
+
+//   const visibleRows = React.useMemo(
+//     () =>
+//       isServerSide
+//         ? [...rows].sort(getComparator(order, orderBy))
+//         : [...rows]
+//             .sort(getComparator(order, orderBy))
+//             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+//     [order, orderBy, page, rowsPerPage, rows, isServerSide]
+//   );
+
+//   return (
+//     <Box sx={{ width: "100%", mt: 2 }}>
+//       <Paper
+//         sx={{
+//           width: "100%",
+//           mb: 2,
+//           borderRadius: "12px",
+//           overflow: "hidden",
+//           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.05)",
+//           border: "1px solid #e2e8f0",
+//         }}
+//       >
+//         {/* Toolbar */}
+//         <Stack
+//           direction="row"
+//           justifyContent="space-between"
+//           alignItems="center"
+//           sx={{ p: 2.5, backgroundColor: "#fff" }}
+//         >
+//           <Typography variant="h6" sx={{ fontWeight: 700, color: "#1e293b" }}>
+//             {title}
+//           </Typography>
+//           <Stack direction="row" spacing={1.5}>
+//             {showExport && (
+//               <ExportCSVButton
+//                 columns={flatColumns}
+//                 rows={rows}
+//                 filename={`${title}.csv`}
+//                 onClick={onExport}
+//               />
+//             )}
+//             <FilterButton onClick={onFilter}>{filterContent}</FilterButton>
+//           </Stack>
+//         </Stack>
+
+//         <Divider />
+
+//         {/* Table */}
+//         <TableContainer sx={{ maxHeight: 600, overflowX: "auto" }}>
+//           <Table
+//             stickyHeader
+//             sx={{ minWidth: 750, tableLayout: "fixed" }}
+//             size="small"
+//           >
+//             <BaseTableHead
+//               columns={columns}
+//               order={order}
+//               orderBy={orderBy}
+//               numSelected={selected.length}
+//               rowCount={rows.length}
+//               onSelectAllClick={handleSelectAllClick}
+//               onRequestSort={handleRequestSort}
+//               hasAction={hasAction}
+//               selectable={selectable}
+//               columnWidths={columnWidths}
+//               startResize={startResize}
+//             />
+//             <TableBody>
+//               {visibleRows.map((row) => {
+//                 const isItemSelected = selected.includes(row.id);
+//                 return (
+//                   <TableRow
+//                     hover
+//                     onClick={(event) => handleClick(event, row.id)}
+//                     role="checkbox"
+//                     aria-checked={isItemSelected}
+//                     tabIndex={-1}
+//                     key={row.id}
+//                     selected={isItemSelected}
+//                   >
+//                     {selectable && (
+//                       <TableCell
+//                         padding="checkbox"
+//                         sx={{
+//                           border: "1px solid #f1f5f9",
+//                           textAlign: "center",
+//                           width: 50,
+//                           minWidth: 50,
+//                         }}
+//                       >
+//                         <Checkbox color="primary" checked={isItemSelected} />
+//                       </TableCell>
+//                     )}
+
+//                     {flatColumns.map((column) => (
+//                       <TableCell
+//                         key={column.id}
+//                         align="center"
+//                         sx={{
+//                           color: "#64748b",
+//                           fontSize: "0.875rem",
+//                           border: "1px solid #f1f5f9",
+//                           width: columnWidths[column.id],
+//                           minWidth: columnWidths[column.id],
+//                           maxWidth: columnWidths[column.id],
+//                           overflow: "hidden",
+//                           textOverflow: "ellipsis",
+//                           whiteSpace: "nowrap",
+//                         }}
+//                       >
+//                         {row[column.id]}
+//                       </TableCell>
+//                     ))}
+
+//                     {hasAction && (
+//                       <TableCell
+//                         align="center"
+//                         sx={{
+//                           border: "1px solid #f1f5f9",
+//                           width: 80,
+//                           minWidth: 80,
+//                         }}
+//                       >
+//                         {row.actions ? (
+//                           row.actions
+//                         ) : (
+//                           <Stack
+//                             direction="row"
+//                             spacing={0.5}
+//                             justifyContent="center"
+//                           >
+//                             <IconButton
+//                               size="small"
+//                               onClick={(e) => {
+//                                 e.stopPropagation();
+//                                 onEditRow?.(row);
+//                               }}
+//                             >
+//                               <EditIcon
+//                                 sx={{ color: "#94a3b8", fontSize: "1.2rem" }}
+//                               />
+//                             </IconButton>
+//                             <IconButton
+//                               size="small"
+//                               onClick={(e) => {
+//                                 e.stopPropagation();
+//                                 onDeleteRow?.(row);
+//                               }}
+//                             >
+//                               <DeleteIcon
+//                                 sx={{ color: "#ef4444", fontSize: "1.2rem" }}
+//                               />
+//                             </IconButton>
+//                           </Stack>
+//                         )}
+//                       </TableCell>
+//                     )}
+//                   </TableRow>
+//                 );
+//               })}
+//             </TableBody>
+//           </Table>
+//         </TableContainer>
+
+//         <Divider />
+
+//         <TablePagination
+//           rowsPerPageOptions={[25, 50, 100]}
+//           component="div"
+//           count={count}
+//           rowsPerPage={rowsPerPage}
+//           page={page}
+//           onPageChange={
+//             isServerSide ? onPageChange : (e, p) => setInternalPage(p)
+//           }
+//           onRowsPerPageChange={
+//             isServerSide
+//               ? onRowsPerPageChange
+//               : (e) => {
+//                   setInternalRowsPerPage(parseInt(e.target.value, 10));
+//                   setInternalPage(0);
+//                 }
+//           }
+//         />
+//       </Paper>
+//     </Box>
+//   );
+// }
