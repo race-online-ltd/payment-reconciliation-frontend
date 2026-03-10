@@ -1,17 +1,24 @@
 // src/features/upload/components/ServiceUploadSection.jsx
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, Typography, Stack, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from "@mui/material";
+import { Card, CardContent, Typography, Stack, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import * as XLSX from "xlsx";
 
 import SelectDropdownSingle from "../../../components/shared/SelectDropdownSingle";
 import UploadButton from "../../../components/shared/UploadButton";
 import { fetchChannels, fetchWallets } from "../api/uploadApi";
+// Add these imports at the top (after the existing imports)
+import {
+  buildExpectedSlug,
+  buildExpectedFileName,
+  validateFileName,
+} from "../../../services/validateFileName";
 
-export default function ServiceUploadSection({ values, onUpload, onDelete }) {
+export default function ServiceUploadSection({ values, onUpload, onDelete, appliedRange }) {
   const [channelOptions, setChannelOptions] = useState([]);
   const [walletOptions, setWalletOptions] = useState([]);
   const [tempFiles, setTempFiles] = useState([]);
+  const [fileError, setFileError] = useState(null);
 
   // Load channels once on mount
   useEffect(() => {
@@ -31,8 +38,28 @@ export default function ServiceUploadSection({ values, onUpload, onDelete }) {
   }, [values.channel]);
 
   const handleFileChange = (files) => {
-    const selectedChannel = channelOptions.find((c) => c.id === values.channel)?.label || "N/A";
-    const selectedWallet = walletOptions.find((w) => w.id === values.wallet)?.label || "N/A";
+    const selectedChannel = channelOptions.find((c) => c.id === values.channel)?.label || "";
+    const selectedWallet  = walletOptions.find((w) => w.id === values.wallet)?.label   || "";
+
+
+    // Build slug from both channel + wallet labels combined
+  const slug = buildExpectedSlug(`${selectedChannel} ${selectedWallet}`);
+
+  const invalidFiles = files.filter(
+    (f) => !validateFileName(f, slug, appliedRange?.startDate, appliedRange?.endDate)
+  );
+
+  if (invalidFiles.length > 0) {
+   const expected = buildExpectedFileName(slug, appliedRange?.startDate, appliedRange?.endDate);
+    setFileError(
+      `Invalid filename(s): ${invalidFiles.map((f) => f.name).join(", ")}.\n` +
+      `Expected format: ${expected}.xlsx / .csv`
+    );
+    return;
+  }
+
+  setFileError(null);
+
 
     files.forEach((file) => {
       const tempFile = {
@@ -76,6 +103,19 @@ export default function ServiceUploadSection({ values, onUpload, onDelete }) {
     setTempFiles((prev) => prev.filter((f) => f.id !== id));
     onDelete(id);
   };
+
+
+  const getExpectedHint = () => {
+  if (!appliedRange?.startDate || !appliedRange?.endDate) return null;
+  const selectedChannel = channelOptions.find((c) => c.id === values.channel)?.label || "";
+  const selectedWallet  = walletOptions.find((w) => w.id === values.wallet)?.label   || "";
+  if (!selectedChannel || !selectedWallet) return null;
+  const slug     = buildExpectedSlug(`${selectedChannel} ${selectedWallet}`);
+  const expected = buildExpectedFileName(slug, appliedRange.startDate, appliedRange.endDate);
+  return `${expected}.xlsx  /  ${expected}.csv`;
+};
+
+const hint = getExpectedHint();
 
   return (
     <Card variant="outlined" sx={{ mb: 3 }}>
@@ -122,6 +162,25 @@ export default function ServiceUploadSection({ values, onUpload, onDelete }) {
             />
           </Box>
         </Stack>
+
+        {/* Expected filename hint */}
+        {hint && (
+          <Typography variant="caption" sx={{ color: "#64748b", mt: 1.5, display: "block" }}>
+            Expected filename: <strong>{hint}</strong>
+          </Typography>
+        )}
+
+        {/* Error alert */}
+        {fileError && (
+          <Alert
+            severity="error"
+            onClose={() => setFileError(null)}
+            sx={{ mt: 1.5, fontSize: 13 }}
+          >
+            {fileError}
+          </Alert>
+        )}
+
 
         {tempFiles.length > 0 && (
           <TableContainer

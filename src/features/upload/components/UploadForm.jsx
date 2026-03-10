@@ -93,8 +93,7 @@ export default function UploadForm() {
                     Transaction Reconciler
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Upload service provider files by channel & wallet,
-                    then compare against your internal database.
+                    Ensure accurate financial reconciliation by comparing provider transactions with your internal records.
                   </Typography>
                 </Box>
 
@@ -170,6 +169,7 @@ export default function UploadForm() {
 
               <ServiceUploadSection
                 values={values}
+                appliedRange={appliedRange}  
                 onUpload={(file, meta, id) =>
                   setServiceFiles((prev) => [
                     ...prev,
@@ -181,6 +181,7 @@ export default function UploadForm() {
 
               <OwnDatabaseUpload
                 values={values}
+                appliedRange={appliedRange}  
                 onUpload={(file, meta, id) =>
                   setOwnFiles((prev) => [
                     ...prev,
