@@ -93,3 +93,30 @@ export const submitReconciliation = async (serviceFiles, ownFiles, dateRange) =>
 
   return res.data;
 };
+
+// Add this function to src/features/upload/api/uploadApi.js
+// alongside your existing submitReconciliation function
+
+export async function submitReprocess(batchId, serviceFiles, ownFiles, appliedRange) {
+  const formData = new FormData();
+
+  formData.append("start_date", format(appliedRange.startDate, "yyyy-MM-dd"));
+  formData.append("end_date",   format(appliedRange.endDate,   "yyyy-MM-dd"));
+
+  serviceFiles.forEach((f, i) => {
+    formData.append(`service_files[${i}]`,      f.file);
+    formData.append(`service_channel_id[${i}]`, f.channelId);
+    formData.append(`service_wallet_id[${i}]`,  f.walletId);
+  });
+
+  ownFiles.forEach((f, i) => {
+    formData.append(`billing_files[${i}]`,    f.file);
+    formData.append(`billing_system_id[${i}]`, f.billingSystemId);
+  });
+
+const response = await api.post(`/reprocess/${batchId}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return response.data;
+}
