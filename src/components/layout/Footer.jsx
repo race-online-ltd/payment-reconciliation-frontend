@@ -23,8 +23,18 @@ export default function Footer() {
       >
         {/* center side: Copyright */}
         <Typography variant="caption" color="text.secondary">
-          &copy; {new Date().getFullYear()} <a href='https://www.race.net.bd/' target='_blank'>Race Online Ltd</a> - Software Division
-        </Typography>
+  &copy; {new Date().getFullYear()}{" "}
+  <a
+    href="https://www.race.net.bd/"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ color: "rgb(136, 182, 68)", textDecoration: "none" }}
+  >
+    Race Online Ltd
+  </a>{" "}
+  - Software Division
+</Typography>
+
       </Stack>
     </Box>
   );
