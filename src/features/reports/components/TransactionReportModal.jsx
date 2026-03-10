@@ -309,7 +309,7 @@ import axios from "axios";
 import api from "../../../api/axios";
 
 const columns = [
-  { id: "date", label: "PGW Trx Date", sortable: true },
+  { id: "vendor_trx_date", label: "PGW Trx Date", sortable: true },
   { id: "billing_trx_date", label: "Billing Trx Date", sortable: true },
   { id: "trxId", label: "Transaction ID", sortable: true },
   { id: "senderWallet", label: "Sender Number", sortable: true },
@@ -319,7 +319,7 @@ const columns = [
   { id: "channel", label: "Channel", sortable: true },
   { id: "wallet", label: "Wallet", sortable: true },
   { id: "status", label: "Status" },
-  { id: "ownDb", label: "Own DB" },
+  { id: "ownDb", label: "Billing System" },
   { id: "vendor", label: "Vendor" },
   { id: "actions", label: "Actions" },
 ];
@@ -400,8 +400,8 @@ export default function TransactionReportModal({
             senderWallet: row.sender_no ?? "-",
             userId: row.customer_id ?? "-",
             entity: row.entity ?? "-",
-            date: row.trx_date
-              ? new Date(row.trx_date).toISOString().split("T")[0]
+            vendor_trx_date: row.vendor_trx_date 
+              ? new Date(row.vendor_trx_date).toISOString().split("T")[0]
               : "-",
             billing_trx_date: row.billing_trx_date
               ? new Date(row.billing_trx_date).toISOString().split("T")[0]
@@ -412,6 +412,8 @@ export default function TransactionReportModal({
             status: row.status,
             ownDb: row.is_billing_system,
             vendor: row.is_vendor,
+            channel_id: row.channel_id,
+            wallet_id: row.wallet_id,
           }))
         );
       })
@@ -448,61 +450,63 @@ export default function TransactionReportModal({
             <CrossIcon fontSize="small" color="error" />
           ),
           actions: (
-            <IconButton
-              size="small"
-              onClick={() => setEditModal({ open: true, data: row })}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          ),
+          <IconButton
+            size="small"
+            onClick={() => {
+              const rawRow = transactions.find((t) => t.id === row.id);
+              setEditModal({ open: true, data: rawRow });
+            }}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        ),
         };
       }),
     [transactions]
   );
 
-    const handleUpdate = async (values) => {
-      try {
-          const payload = {
-              sender_no:          values.senderWallet,
-              customer_id:        values.userId,
-              entity:             values.entity,
-              amount:             values.amount,
-              date:               values.date,         // trx_date
-              billing_date:       values.billing_date,
-              status:             values.status,
-              own_db:             values.own_db,
-              is_vendor:          values.vendor,
-              channel_id:   values.channel_id,   
-              wallet_id:    values.wallet_id,    
-          };
+   const handleUpdate = async (values) => {
+  try {
+    const payload = {
+      sender_no:        values.senderWallet,
+      customer_id:      values.userId,
+      entity:           values.entity,
+      amount:           values.amount,
+      vendor_trx_date:  values.vendor   ? values.vendor_trx_date  : null, // ← null if not in vendor DB
+      billing_trx_date: values.own_db   ? values.billing_trx_date : null, // ← null if not in billing DB
+      status:           values.status,
+      own_db:           values.own_db,
+      is_vendor:        values.vendor,
+      channel_id:       values.channel_id,
+      wallet_id:        values.wallet_id,
+    };
 
-          await api.put(`/comparisons/${values.id}`, payload);
+    await api.put(`/comparisons/${values.id}`, payload);
 
-          // Optimistically update local state so table reflects changes immediately
-          setTransactions((prev) =>
-              prev.map((r) =>
-                  r.id === values.id
-                      ? {
-                          ...r,
-                          senderWallet: values.senderWallet,
-                          userId:       values.userId,
-                          entity:       values.entity,
-                          amount:       values.amount,
-                          date:         values.date,
-                          status:       values.status,
-                          ownDb:        values.own_db,
-                          vendor:       values.vendor,
-                      }
-                      : r
-              )
-          );
+    setTransactions((prev) =>
+      prev.map((r) =>
+        r.id === values.id
+          ? {
+              ...r,
+              senderWallet:    values.senderWallet,
+              userId:          values.userId,
+              entity:          values.entity,
+              amount:          values.amount,
+              vendor_trx_date:            values.vendor_trx_date,   // ← update local state
+              billing_trx_date: values.billing_trx_date,
+              status:          values.status,
+              ownDb:           values.own_db,
+              vendor:          values.vendor,
+            }
+          : r
+      )
+    );
 
-          setEditModal({ open: false, data: null });
-      } catch (err) {
-          console.error("Update failed", err);
-          // Optionally show a snackbar/toast here
-      }
-  };
+    setEditModal({ open: false, data: null });
+  } catch (err) {
+    console.error("Update failed", err);
+  }
+};
 
   const handleOpenFilter = (e) => {
     setDraftFilters(appliedFilters);
