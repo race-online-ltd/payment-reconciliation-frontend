@@ -832,81 +832,44 @@ export default function TransactionReportModal({
   }, [draftFilters.channel_id]);
 
   // ─── fetch transactions ───────────────────────────────────────────
-  // useEffect(() => {
-  //   if (!batchId || !processNo) return;
+  useEffect(() => {
+    if (!batchId || !processNo) return;
 
-  //   fetchComparisonDetails(batchId, processNo, page + 1, rowsPerPage, appliedFilters)
-  //     .then((res) => {
-  //       const paginated = res.data.data;
-  //       const raw       = paginated.data ?? [];
+    console.log("🔍 Fetching with filters:", appliedFilters); // ← temp debug
 
-  //       setTotalRows(paginated.total);
+    fetchComparisonDetails(batchId, processNo, page + 1, rowsPerPage, appliedFilters)
+      .then((res) => {
+        const paginated = res.data.data;
+        const raw       = paginated.data ?? [];
 
-  //       setTransactions(
-  //         raw.map((row) => ({
-  //           id:               row.id,
-  //           trxId:            row.trx_id,
-  //           senderWallet:     row.sender_no   ?? "-",
-  //           userId:           row.customer_id ?? "-",
-  //           entity:           row.entity      ?? "-",
-  //           vendor_trx_date:  row.vendor_trx_date
-  //             ? new Date(row.vendor_trx_date).toISOString().split("T")[0]
-  //             : "-",
-  //           billing_trx_date: row.billing_trx_date
-  //             ? new Date(row.billing_trx_date).toISOString().split("T")[0]
-  //             : "-",
-  //           amount:     row.amount,
-  //           channel:    row.channel?.channel_name ?? "-",
-  //           wallet:     row.wallet?.wallet_number ?? "-",
-  //           status:     row.status,
-  //           ownDb:      row.is_billing_system,
-  //           vendor:     row.is_vendor,
-  //           channel_id: row.channel_id,
-  //           wallet_id:  row.wallet_id,
-  //         }))
-  //       );
-  //     })
-  //     .catch((err) => console.error("Failed to fetch comparisons", err));
-  // }, [batchId, processNo, page, rowsPerPage, appliedFilters]);
-  // ─── fetch transactions ───────────────────────────────────────────
-useEffect(() => {
-  if (!batchId || !processNo) return;
+        setTotalRows(paginated.total);
 
-  console.log("🔍 Fetching with filters:", appliedFilters); // ← temp debug
-
-  fetchComparisonDetails(batchId, processNo, page + 1, rowsPerPage, appliedFilters)
-    .then((res) => {
-      const paginated = res.data.data;
-      const raw       = paginated.data ?? [];
-
-      setTotalRows(paginated.total);
-
-      setTransactions(
-        raw.map((row) => ({
-          id:               row.id,
-          trxId:            row.trx_id,
-          senderWallet:     row.sender_no   ?? "-",
-          userId:           row.customer_id ?? "-",
-          entity:           row.entity      ?? "-",
-          vendor_trx_date:  row.vendor_trx_date
-            ? new Date(row.vendor_trx_date).toISOString().split("T")[0]
-            : "-",
-          billing_trx_date: row.billing_trx_date
-            ? new Date(row.billing_trx_date).toISOString().split("T")[0]
-            : "-",
-          amount:     row.amount,
-          channel:    row.channel?.channel_name ?? "-",
-          wallet:     row.wallet?.wallet_number ?? "-",
-          status:     row.status,
-          ownDb:      row.is_billing_system,
-          vendor:     row.is_vendor,
-          channel_id: row.channel_id,
-          wallet_id:  row.wallet_id,
-        }))
-      );
-    })
-    .catch((err) => console.error("Failed to fetch comparisons", err));
-}, [batchId, processNo, page, rowsPerPage, appliedFilters]);
+        setTransactions(
+          raw.map((row) => ({
+            id:               row.id,
+            trxId:            row.trx_id,
+            senderWallet:     row.sender_no   ?? "-",
+            userId:           row.customer_id ?? "-",
+            entity:           row.entity      ?? "-",
+            vendor_trx_date:  row.vendor_trx_date
+              ? new Date(row.vendor_trx_date).toISOString().split("T")[0]
+              : "-",
+            billing_trx_date: row.billing_trx_date
+              ? new Date(row.billing_trx_date).toISOString().split("T")[0]
+              : "-",
+            amount:     row.amount,
+            channel:    row.channel?.channel_name ?? "-",
+            wallet:     row.wallet?.wallet_number ?? "-",
+            status:     row.status,
+            ownDb:      row.is_billing_system,
+            vendor:     row.is_vendor,
+            channel_id: row.channel_id,
+            wallet_id:  row.wallet_id,
+          }))
+        );
+      })
+      .catch((err) => console.error("Failed to fetch comparisons", err));
+  }, [batchId, processNo, page, rowsPerPage, appliedFilters]);
 
   // ─── formatted rows for BaseTable ────────────────────────────────
   const formattedRows = useMemo(
@@ -1168,7 +1131,7 @@ useEffect(() => {
                       borderRadius: 0, px: 2.5, py: "7px", fontSize: "0.8rem",
                       fontWeight: 600, letterSpacing: "0.03em", textTransform: "none",
                       minWidth: 72, alignSelf: "stretch",
-                      bgcolor: "primary.main", "&:hover": { bgcolor: "primary.dark" },
+                      bgcolor: "#34a853", "&:hover": { bgcolor: "#2d9247" },
                     }}
                   >
                     Search
@@ -1176,21 +1139,6 @@ useEffect(() => {
                 </Box>
               }
             />
-            {/* <BaseTable
-              columns={columns}
-              rows={formattedRows}
-              selectable={false}
-              hasAction={false}
-              onFilter={handleOpenFilter}
-              totalRows={totalRows}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              onPageChange={(e, newPage) => setPage(newPage)}
-              onRowsPerPageChange={(e) => {
-                setRowsPerPage(parseInt(e.target.value, 10));
-                setPage(0);
-              }}
-            /> */}
           </Form>
         )}
       </Formik>
