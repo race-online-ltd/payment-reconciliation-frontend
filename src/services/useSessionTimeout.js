@@ -1,7 +1,7 @@
 // src/hooks/useSessionTimeout.js
 import { useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../features/auth/api/authapi";
+import { logoutUser } from "../features/auth/api/authApi";
 
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes idle → logout
 

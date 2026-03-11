@@ -205,7 +205,8 @@ return /^01[3-9]\d{8}$/.test(num||"");
 /* overall form validation */
 const isFormValid=
 values.senderWallet &&
-isValidBDNumber(values.senderWallet) &&
+values.senderWallet.length >= 10 &&  
+values.senderWallet.length <= 13 && 
 values.userId &&
 values.entity &&
 values.amount &&
@@ -252,22 +253,22 @@ sx={fieldSx}
 />
 
 <TextField
-fullWidth
-label="Sender No."
-name="senderWallet"
-value={values.senderWallet||""}
-onChange={(e)=>{
-const value=e.target.value.replace(/\D/g,"").slice(0,11);
-setFieldValue("senderWallet",value);
-}}
-size="small"
-error={values.senderWallet && !isValidBDNumber(values.senderWallet)}
-helperText={
-values.senderWallet && !isValidBDNumber(values.senderWallet)
-? "Enter a valid 11 digit Bangladeshi number"
-: ""
-}
-sx={fieldSx}
+  fullWidth
+  label="Sender No."
+  name="senderWallet"
+  value={values.senderWallet || ""}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 13);
+    setFieldValue("senderWallet", value);
+  }}
+  size="small"
+  error={values.senderWallet && (values.senderWallet.length < 10 || values.senderWallet.length > 13)}
+  helperText={
+    values.senderWallet && (values.senderWallet.length < 10 || values.senderWallet.length > 13)
+      ? "Enter a valid number"
+      : ""
+  }
+  sx={fieldSx}
 />
 
 <TextField
