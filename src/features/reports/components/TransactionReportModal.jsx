@@ -1131,7 +1131,7 @@ export default function TransactionReportModal({
                       borderRadius: 0, px: 2.5, py: "7px", fontSize: "0.8rem",
                       fontWeight: 600, letterSpacing: "0.03em", textTransform: "none",
                       minWidth: 72, alignSelf: "stretch",
-                      bgcolor: "#34a853", "&:hover": { bgcolor: "#2d9247" },
+                      bgcolor: "rgb(152, 193, 86)", "&:hover": { bgcolor: "rgb(122, 159, 63)" },
                     }}
                   >
                     Search
