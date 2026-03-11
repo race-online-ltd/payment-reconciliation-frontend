@@ -14,20 +14,15 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-// Response interceptor to handle 401 errors globally
+// Redirect to login on 401 (expired or invalid token)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Token invalid or expired, redirect to login
+    if (error.response?.status === 401) {
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
       window.location.href = "/login";
