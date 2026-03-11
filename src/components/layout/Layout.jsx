@@ -1,23 +1,27 @@
 // src/components/layout/Layout.jsx
 import React, { useState } from "react";
-import { Box, CssBaseline } from "@mui/material";
+import { Box, CssBaseline, useMediaQuery, useTheme } from "@mui/material";
 import { Outlet } from "react-router-dom";
-
-// Sidebar, Topbar, Footer
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import Footer from "./Footer";
 
 export default function Layout() {
-  const [open, setOpen] = useState(true);
-  const handleToggle = () => setOpen(!open);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // On mobile: sidebar starts closed. On desktop: starts open.
+  const [open, setOpen] = useState(!isMobile);
+
+  const handleToggle = () => setOpen((prev) => !prev);
+  const handleClose  = () => setOpen(false);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100vw", overflowX: "hidden" }}>
       <CssBaseline />
-      
+
       {/* Sidebar */}
-      <Sidebar open={open} />
+      <Sidebar open={open} isMobile={isMobile} onClose={handleClose} />
 
       {/* Main Content Area */}
       <Box
@@ -31,24 +35,21 @@ export default function Layout() {
           bgcolor: "#f8fafc",
         }}
       >
-        {/* Topbar */}
-        <Topbar open={open} handleToggle={handleToggle} />
+        <Topbar open={open} handleToggle={handleToggle} isMobile={isMobile} />
 
-        {/* Main Content */}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            px: { xs: 1, sm: 1, md: 1 }, // ✅ smaller horizontal padding
-            py: { xs: 1, sm: 1, md: 1 }, // vertical padding remains responsive
-            mt: 8, // margin from topbar
+            px: { xs: 1, sm: 1, md: 1 },
+            py: { xs: 1, sm: 1, md: 1 },
+            mt: 8,
             width: "100%",
           }}
         >
           <Outlet />
         </Box>
 
-        {/* Footer */}
         <Footer />
       </Box>
     </Box>

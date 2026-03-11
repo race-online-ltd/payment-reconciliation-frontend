@@ -1,30 +1,17 @@
-
 import * as React from "react";
-import PropTypes from "prop-types";
 import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TableSortLabel,
-  Paper,
-  Checkbox,
-  IconButton,
-  Typography,
-  Stack,
-  Divider,
+  Box, Table, TableBody, TableCell, TableContainer, TableHead,
+  TablePagination, TableRow, TableSortLabel, Paper, Checkbox,
+  IconButton, Typography, Stack, Divider, useMediaQuery, useTheme,
+  Tooltip,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import ExportCSVButton from "./ExportCSVButton";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import ExportCSVButton, { downloadCSV } from "./ExportCSVButton";
 import FilterButton from "./FilterButton";
 
-// --- Sorting Helpers ---
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
@@ -37,20 +24,11 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// --- Table Head ---
 function BaseTableHead({
-  columns,
-  order,
-  orderBy,
-  numSelected,
-  rowCount,
-  onSelectAllClick,
-  onRequestSort,
-  hasAction,
-  selectable,
+  columns, order, orderBy, numSelected, rowCount,
+  onSelectAllClick, onRequestSort, hasAction, selectable,
 }) {
   const createSortHandler = (property) => (event) => onRequestSort(event, property);
-
   const secondaryHeaderColumns = columns.flatMap((col) => col.children || []);
   const hasSecondaryHeader = secondaryHeaderColumns.length > 0;
 
@@ -79,11 +57,8 @@ function BaseTableHead({
             rowSpan={column.children ? 1 : hasSecondaryHeader ? 2 : 1}
             sortDirection={orderBy === column.id ? order : false}
             sx={{
-              backgroundColor: "#f8fafc",
-              fontWeight: 700,
-              color: "#475569",
-              fontSize: "0.875rem",
-              border: "1px solid #e2e8f0",
+              backgroundColor: "#f8fafc", fontWeight: 700,
+              color: "#475569", fontSize: "0.875rem", border: "1px solid #e2e8f0",
             }}
           >
             {column.sortable ? (
@@ -100,9 +75,7 @@ function BaseTableHead({
                   </Box>
                 )}
               </TableSortLabel>
-            ) : (
-              column.label
-            )}
+            ) : column.label}
           </TableCell>
         ))}
         {hasAction && (
@@ -123,11 +96,8 @@ function BaseTableHead({
               key={child.id}
               align="center"
               sx={{
-                backgroundColor: "#f8fafc",
-                fontWeight: 700,
-                color: "#475569",
-                fontSize: "0.75rem",
-                border: "1px solid #e2e8f0",
+                backgroundColor: "#f8fafc", fontWeight: 700,
+                color: "#475569", fontSize: "0.75rem", border: "1px solid #e2e8f0",
               }}
             >
               {child.label}
@@ -139,57 +109,29 @@ function BaseTableHead({
   );
 }
 
-// --- BaseTable Component ---
-// export default function BaseTable({
-//   columns,
-//   rows,
-//   title,
-//   selectable = true,
-//   hasAction = true,
-//   showExport = true,
-//   onEditRow,
-//   onDeleteRow,
-//   onFilter,
-//   onExport,
-//   filterContent = null,
-//     totalRows = null,
-//   page: externalPage = null,
-//   rowsPerPage: externalRowsPerPage = null,
-//   onPageChange = null,
-//   onRowsPerPageChange = null,
-// }) {
 export default function BaseTable({
-  columns,
-  rows,
-  title,
-  selectable = true,
-  hasAction = true,
-  showExport = true,
-  onEditRow,
-  onDeleteRow,
-  onFilter,
-  onExport,
-  filterContent = null,
-  toolbarActions = null,   // ← ADD THIS
+  columns, rows, title,
+  selectable = true, hasAction = true, showExport = true,
+  onEditRow, onDeleteRow, onFilter, onExport,
+  filterContent = null, toolbarActions = null,
   totalRows = null,
   page: externalPage = null,
   rowsPerPage: externalRowsPerPage = null,
-  onPageChange = null,
-  onRowsPerPageChange = null,
+  onPageChange = null, onRowsPerPageChange = null,
 }) {
-    const [order, setOrder] = React.useState("asc");
-    const [orderBy, setOrderBy] = React.useState(columns[0]?.id || "");
-    const [selected, setSelected] = React.useState([]);
-    const [internalPage, setInternalPage] = React.useState(0);
-    const [internalRowsPerPage, setInternalRowsPerPage] = React.useState(10);
+  const theme    = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const isServerSide = totalRows !== null && externalPage !== null;
+  const [order, setOrder] = React.useState("asc");
+  const [orderBy, setOrderBy] = React.useState(columns[0]?.id || "");
+  const [selected, setSelected] = React.useState([]);
+  const [internalPage, setInternalPage] = React.useState(0);
+  const [internalRowsPerPage, setInternalRowsPerPage] = React.useState(10);
 
-    const page = isServerSide ? externalPage : internalPage;
-    const rowsPerPage = isServerSide ? externalRowsPerPage : internalRowsPerPage;
-    const count = isServerSide ? totalRows : rows.length;
-  // ✅ Always dense
-  const dense = true;
+  const isServerSide = totalRows !== null && externalPage !== null;
+  const page = isServerSide ? externalPage : internalPage;
+  const rowsPerPage = isServerSide ? externalRowsPerPage : internalRowsPerPage;
+  const count = isServerSide ? totalRows : rows.length;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -198,10 +140,7 @@ export default function BaseTable({
   };
 
   const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      setSelected(rows.map((r) => r.id));
-      return;
-    }
+    if (event.target.checked) { setSelected(rows.map((r) => r.id)); return; }
     setSelected([]);
   };
 
@@ -209,11 +148,12 @@ export default function BaseTable({
     if (!selectable) return;
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
-    if (selectedIndex === -1) newSelected = newSelected.concat(selected, id);
-    else if (selectedIndex === 0) newSelected = newSelected.concat(selected.slice(1));
+    if (selectedIndex === -1)      newSelected = newSelected.concat(selected, id);
+    else if (selectedIndex === 0)  newSelected = newSelected.concat(selected.slice(1));
     else if (selectedIndex === selected.length - 1) newSelected = newSelected.concat(selected.slice(0, -1));
-    else if (selectedIndex > 0)
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+    else if (selectedIndex > 0)    newSelected = newSelected.concat(
+      selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1)
+    );
     setSelected(newSelected);
   };
 
@@ -222,59 +162,91 @@ export default function BaseTable({
   }, [columns]);
 
   const visibleRows = React.useMemo(
-      () =>
-        isServerSide
-          ? [...rows].sort(getComparator(order, orderBy)) // already paginated from server
-          : [...rows]
-              .sort(getComparator(order, orderBy))
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-      [order, orderBy, page, rowsPerPage, rows, isServerSide]
-    );
+    () =>
+      isServerSide
+        ? [...rows].sort(getComparator(order, orderBy))
+        : [...rows].sort(getComparator(order, orderBy))
+            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [order, orderBy, page, rowsPerPage, rows, isServerSide]
+  );
+
+  // Shared export handler — calls custom onExport if provided, else uses downloadCSV util
+  const handleExportClick = () => {
+    if (onExport) return onExport();
+    downloadCSV(flatColumns, rows, `${title || "export"}.csv`);
+  };
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      <Paper
-        sx={{
-          width: "100%",
-          mb: 2,
-          borderRadius: "12px",
-          overflow: "hidden",
-          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.05)",
-          border: "1px solid #e2e8f0",
-        }}
-      >
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 2.5, backgroundColor: "#fff" }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1e293b" }}>
+      <Paper sx={{
+        width: "100%", mb: 2, borderRadius: "12px", overflow: "hidden",
+        boxShadow: "0px 4px 12px rgba(0,0,0,0.05)", border: "1px solid #e2e8f0",
+      }}>
+
+        {/* ── Toolbar: single row on desktop, stacked on mobile ── */}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "stretch", sm: "center" }}
+          gap={1.5}
+          sx={{ p: 2, backgroundColor: "#fff" }}
+        >
+          {/* Title */}
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1e293b", flexShrink: 0 }}>
             {title}
           </Typography>
 
-          {/* ← ADD THIS — renders search box or any custom element */}
+          {/* Search / toolbarActions — fills middle on desktop, full width on mobile */}
           {toolbarActions && (
-            <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start", mx: 1 }}>
-              {toolbarActions}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              {React.cloneElement(toolbarActions, {
+                sx: { ...(toolbarActions.props.sx || {}), width: "100%" },
+              })}
             </Box>
           )}
 
-          <Stack direction="row" spacing={1.5}>
-            {showExport && <ExportCSVButton columns={flatColumns} rows={rows} filename={`${title}.csv`} onClick={onExport} />}
+          {/* Export + Filter buttons */}
+          <Stack direction="row" spacing={1} flexShrink={0} alignSelf={{ xs: "flex-end", sm: "auto" }}>
+            {showExport && (
+              isMobile ? (
+                <Tooltip title="Export CSV">
+                  <IconButton
+                    size="small"
+                    onClick={handleExportClick}
+                    sx={{
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      p: "6px",
+                      color: "#64748b",
+                      "&:hover": { bgcolor: "#f1f5f9" },
+                    }}
+                  >
+                    <FileDownloadOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <ExportCSVButton
+                  columns={flatColumns}
+                  rows={rows}
+                  filename={`${title || "export"}.csv`}
+                  onClick={onExport}
+                />
+              )
+            )}
             <FilterButton onClick={onFilter}>{filterContent}</FilterButton>
           </Stack>
         </Stack>
 
         <Divider />
 
-        <TableContainer sx={{ maxHeight: 600 }}>
+        <TableContainer sx={{ maxHeight: 600, overflowX: "auto" }}>
           <Table stickyHeader sx={{ minWidth: 750 }} size="small">
             <BaseTableHead
-              columns={columns}
-              order={order}
-              orderBy={orderBy}
-              numSelected={selected.length}
-              rowCount={rows.length}
+              columns={columns} order={order} orderBy={orderBy}
+              numSelected={selected.length} rowCount={rows.length}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              hasAction={hasAction}
-              selectable={selectable}
+              hasAction={hasAction} selectable={selectable}
             />
             <TableBody>
               {visibleRows.map((row) => {
@@ -283,11 +255,8 @@ export default function BaseTable({
                   <TableRow
                     hover
                     onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
+                    role="checkbox" aria-checked={isItemSelected}
+                    tabIndex={-1} key={row.id} selected={isItemSelected}
                   >
                     {selectable && (
                       <TableCell padding="checkbox" sx={{ border: "1px solid #f1f5f9", textAlign: "center" }}>
@@ -295,7 +264,9 @@ export default function BaseTable({
                       </TableCell>
                     )}
                     {flatColumns.map((column) => (
-                      <TableCell key={column.id} align="center" sx={{ color: "#64748b", fontSize: "0.875rem", border: "1px solid #f1f5f9" }}>
+                      <TableCell key={column.id} align="center"
+                        sx={{ color: "#64748b", fontSize: "0.875rem", border: "1px solid #f1f5f9" }}
+                      >
                         {row[column.id]}
                       </TableCell>
                     ))}
@@ -322,25 +293,23 @@ export default function BaseTable({
 
         <Divider />
 
-     <TablePagination
-        rowsPerPageOptions={[25, 50, 100]}
-        component="div"
-        count={count}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={isServerSide ? onPageChange : (e, p) => setInternalPage(p)}
-        onRowsPerPageChange={
-          isServerSide
-            ? onRowsPerPageChange
-            : (e) => { setInternalRowsPerPage(parseInt(e.target.value, 10)); setInternalPage(0); }
-        }
-      />
+        <TablePagination
+          rowsPerPageOptions={[25, 50, 100]}
+          component="div"
+          count={count}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={isServerSide ? onPageChange : (e, p) => setInternalPage(p)}
+          onRowsPerPageChange={
+            isServerSide
+              ? onRowsPerPageChange
+              : (e) => { setInternalRowsPerPage(parseInt(e.target.value, 10)); setInternalPage(0); }
+          }
+        />
       </Paper>
     </Box>
   );
 }
-
-
 
 // --- Resizable Columns Hook ---
 
