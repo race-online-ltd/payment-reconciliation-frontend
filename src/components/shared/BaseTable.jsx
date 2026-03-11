@@ -140,6 +140,24 @@ function BaseTableHead({
 }
 
 // --- BaseTable Component ---
+// export default function BaseTable({
+//   columns,
+//   rows,
+//   title,
+//   selectable = true,
+//   hasAction = true,
+//   showExport = true,
+//   onEditRow,
+//   onDeleteRow,
+//   onFilter,
+//   onExport,
+//   filterContent = null,
+//     totalRows = null,
+//   page: externalPage = null,
+//   rowsPerPage: externalRowsPerPage = null,
+//   onPageChange = null,
+//   onRowsPerPageChange = null,
+// }) {
 export default function BaseTable({
   columns,
   rows,
@@ -152,7 +170,8 @@ export default function BaseTable({
   onFilter,
   onExport,
   filterContent = null,
-    totalRows = null,
+  toolbarActions = null,   // ← ADD THIS
+  totalRows = null,
   page: externalPage = null,
   rowsPerPage: externalRowsPerPage = null,
   onPageChange = null,
@@ -228,6 +247,14 @@ export default function BaseTable({
           <Typography variant="h6" sx={{ fontWeight: 700, color: "#1e293b" }}>
             {title}
           </Typography>
+
+          {/* ← ADD THIS — renders search box or any custom element */}
+          {toolbarActions && (
+            <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start", mx: 1 }}>
+              {toolbarActions}
+            </Box>
+          )}
+
           <Stack direction="row" spacing={1.5}>
             {showExport && <ExportCSVButton columns={flatColumns} rows={rows} filename={`${title}.csv`} onClick={onExport} />}
             <FilterButton onClick={onFilter}>{filterContent}</FilterButton>
