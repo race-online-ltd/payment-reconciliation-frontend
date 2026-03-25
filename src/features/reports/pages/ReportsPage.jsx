@@ -18,6 +18,7 @@ function transformSummary(apiData) {
       bkashPaybill: item.mismatch.bkash_paybill,
       nagadPGW: item.mismatch.nagad_pgw,
       nagadPaybill: item.mismatch.nagad_paybill,
+      ssl: item.mismatch.ssl,
       ownDB: item.mismatch.own_db,
       total: item.mismatch.total,
     },
