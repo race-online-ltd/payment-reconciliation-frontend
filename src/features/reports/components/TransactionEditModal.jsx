@@ -624,8 +624,6 @@
 
 
 
-
-
 import React, { useEffect, useState } from "react";
 import api from "../../../api/axios";
 import {
@@ -640,6 +638,7 @@ import {
 } from "@mui/icons-material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { toast } from "react-toastify"; // ← NEW
 
 /* ─── palette ─────────────────────────────────────────────────── */
 const C = {
@@ -705,8 +704,6 @@ const dateSx = {
 /* ─── Yup validation schema ────────────────────────────────────── */
 const validationSchema = Yup.object({
   senderWallet: Yup.string()
-    .matches(/^\d+$/, "Only digits are allowed")
-    .min(10, "Must be at least 10 digits")
     .max(13, "Must be at most 13 digits"),
 
   userId: Yup.string()
@@ -834,6 +831,36 @@ const TransactionEditModal = ({ open, onClose, initialData, onSave }) => {
     helperText: touched[name] && errors[name] ? errors[name] : "",
   });
 
+  /* ── wrapped onSave: shows toast then closes modal on success ── */
+  const handleSave = async (values, formikHelpers) => {
+    try {
+      await onSave(values, formikHelpers);
+      toast.success("Transaction updated successfully!", {
+         style: {
+        background: C.successBg,
+        color: C.success,
+        border: `1px solid ${C.successBorder}`,
+        },
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+      });
+      onClose();
+    } catch (err) {
+      toast.error("Failed to update transaction. Please try again.", {
+        style: {
+      background: "#fee2e2",
+      color: "#dc2626",
+      border: "1px solid #fecaca",
+      },
+        position: "top-right",
+        autoClose: 4000,
+      });
+    }
+  };
+
   return (
     <Dialog
       open={open}
@@ -901,7 +928,7 @@ const TransactionEditModal = ({ open, onClose, initialData, onSave }) => {
         }}
         enableReinitialize
         validationSchema={validationSchema}
-        onSubmit={onSave}
+        onSubmit={handleSave} // ← uses wrapped handler
       >
         {({
           values, errors, touched,
