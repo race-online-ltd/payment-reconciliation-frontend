@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           script: |
-            TARGET_DIR="/var/www/html/application/frontend"
+            TARGET_DIR="/var/www/html/frontend"
             DELETE_PATH="${TARGET_DIR}/dist"
 
             echo "Attempting to remove old dist folder at ${DELETE_PATH}"
@@ -54,7 +54,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           source: 'dist'
-          target: '/var/www/html/application/frontend'
+          target: '/var/www/html/frontend'
 
       - name: 7. Reload Nginx
         uses: appleboy/ssh-action@v1.0.3
@@ -64,6 +64,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           script: |
-            echo "Successfully deployed to /var/www/html/application/frontend/dist. Now reloading Nginx..."
+            echo "Successfully deployed to /var/www/html/frontend/dist. Now reloading Nginx..."
             sudo systemctl reload nginx
             echo "Nginx has been reloaded. Deployment complete."
