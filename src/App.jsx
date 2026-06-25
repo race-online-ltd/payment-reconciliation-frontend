@@ -1,6 +1,8 @@
 import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
+import { ToastContainer } from "react-toastify";           
+import "react-toastify/dist/ReactToastify.css"; 
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
@@ -31,6 +33,13 @@ export default function App() {
   return (
     <Suspense fallback={<Loading />}>
       <CssBaseline />
+
+        <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        theme="colored"
+      />
+
 
       <Routes>
 
